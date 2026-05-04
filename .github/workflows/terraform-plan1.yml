@@ -1,38 +1,60 @@
-name: Terraform Plan
+name: terraform-plan
+
 
 on:
   pull_request:
-    branches: [develop]
-    paths: ['infra/**']
+    branches:
+      - develop
+    types: [opened, synchronize, reopened]
+
   workflow_dispatch:
     inputs:
-      environment:
+      ENV:
         description: "Target environment"
         required: true
         type: choice
-        options: [dev]
+        options:
+          - dev
         default: dev
+      APP:
+        description: "Application identifier"
+        required: true
+        type: choice
+        options:
+          - myapp
 
 jobs:
   terraform-plan:
-    name: Terraform Plan
+    name: Terraform CI - Plan
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'dev' }}
-    
+    environment: ${{ inputs.ENV || 'dev' }}
+
+    env:
+      TF_IN_AUTOMATION: true
+
     defaults:
       run:
-        working-directory: infra/envs/${{ inputs.environment || 'dev' }}
+        working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate Terraform Cloud token
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}" ]; then
+            echo "::error::Missing Terraform Cloud token"
+            exit 1
+          fi
+
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.14.0
+          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}
 
-      - name: Terraform Format
+      - name: Terraform Format Check
         run: terraform fmt -check
 
       - name: Terraform Init
@@ -42,4 +64,6 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -no-color
+        run: |
+          echo "Running Terraform PLAN (CI) for ${{ inputs.ENV || 'dev' }} environment"
+          terraform plan -no-color
