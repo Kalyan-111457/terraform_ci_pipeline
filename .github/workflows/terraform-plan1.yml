@@ -1,26 +1,24 @@
 name: terraform-plan
-
 on:
   pull_request:
     branches:
       - develop
 
-env:
-  ENV: dev
-  APP: myapp
+
+
 
 jobs:
   terraform-plan:
+
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
-    environment: dev
 
     env:
       TF_IN_AUTOMATION: true
 
     defaults:
       run:
-        working-directory: infra/envs/${{ env.ENV }}
+        working-directory: infra/envs/dev
 
     steps:
       - name: Checkout repository
@@ -40,7 +38,7 @@ jobs:
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.14.0
-          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}
+          cli_config_credentials_token: ${{ secrets.MYAPP_TFE_TOKEN }}
 
       - name: Terraform Format Check
         if: env.TOKEN_EXISTS == 'true'
@@ -58,7 +56,14 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform PLAN for $ENV"
-          terraform plan -no-color
+          terraform plan -no-color -out=tfplan  
+
+      - name: Upload Dev Plan
+        if: env.TOKEN_EXISTS == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-tfplan
+          path: infra/envs/dev/tfplan
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
