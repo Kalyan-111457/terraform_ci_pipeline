@@ -61,13 +61,7 @@ jobs:
         with:
           name: dev-plan
           path: infra/envs/dev/tfplan
-
-      - name: Upload Lock File
-        if: env.TOKEN_EXISTS == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dev-lockfile
-          path: .terraform.lock.hcl
+          
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
