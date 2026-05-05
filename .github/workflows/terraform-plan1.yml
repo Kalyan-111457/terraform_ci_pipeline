@@ -54,14 +54,14 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform PLAN for dev"
-          terraform plan -no-color -out=tfplan  
+          terraform plan -no-color -out=tfplan
 
       - name: Upload Dev Plan
         if: env.TOKEN_EXISTS == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: dev-tfplan
-          path: infra/envs/dev/tfplan
+          path: tfplan
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
@@ -102,11 +102,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dev-tfplan
-          path: infra/envs/dev/tfplan
+          path: .
       
       - name: Terraform Apply
         if: env.TOKEN_EXISTS == 'true'
-        run: terraform apply -auto-approve infra/envs/dev/tfplan
+        run: terraform apply -auto-approve tfplan
         
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
