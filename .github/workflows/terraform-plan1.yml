@@ -76,7 +76,7 @@ jobs:
         shell: bash
         id: show
         run: |
-           if  terraform show tfplan | grep -q "No changes."; then
+           if  terraform show -no-color tfplan | grep -q "No changes."; then
            echo "changes=0" >> $GITHUB_OUTPUT
            echo "No changes detected"
            else
