@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       ENV:
-        description: "Target environment"
+        description: "Target environment: `dev`, `qa`, `prod`"
         required: true
         type: choice
-        options:
-          - dev
+        options: [dev, qa, prod]
         default: dev
+      
 
 jobs:
   terraform-plan:

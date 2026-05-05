@@ -6,19 +6,21 @@ on:
       - develop
 
   workflow_dispatch:
+
     inputs:
       ENV:
-        description: "Target environment"
+        description: "Target environment: `dev`, `qa`, `prod`"
         required: true
         type: choice
         options: [dev, qa, prod]
         default: dev
 
       APP:
-        description: "Application identifier"
+        description: "Application identifier (e.g. `myapp`, `otherapp`)"
         required: true
         type: choice
         options: [myapp, otherapp]
+        
 
 jobs:
   terraform-plan:
