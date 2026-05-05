@@ -22,3 +22,10 @@ variable "vnet_subnet_count" {
   description = "The number of subnets to create in the virtual network."
   type        = number
 }
+
+# Added for pipeline test
+variable "pipeline_test_flag" {
+  description = "Flag to test pipeline PR trigger."
+  type        = bool
+  default     = true
+}
