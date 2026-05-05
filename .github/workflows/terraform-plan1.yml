@@ -60,7 +60,7 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         id: plan
         run: |
-          echo "Running Terraform PLAN for dev"
+          echo "Running Terraform PLANs for dev"
           terraform plan -no-color -out=tfplan> plan.txt
 
       - name: Upload Dev Plan
