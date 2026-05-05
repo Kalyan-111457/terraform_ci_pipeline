@@ -7,7 +7,7 @@ on:
 
   workflow_dispatch:
     inputs:
-      environment:
+      ENV:
         description: "Target environment"
         required: true
         type: choice
@@ -22,7 +22,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infra/envs/${{ inputs.environment || 'dev' }}
+        working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
 
     steps:
       - name: Checkout repository
