@@ -14,7 +14,7 @@ variable "address_space" {
 }
 
 variable "vnet_name" {
-  description = "The name of the virtual network."
+  description = "The name of the virtual networka."
   type        = string
 }
 
