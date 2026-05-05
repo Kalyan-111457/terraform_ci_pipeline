@@ -5,39 +5,22 @@ on:
     branches:
       - develop
 
-  workflow_dispatch:
-
-    inputs:
-      ENV:
-        description: "Target environment: `dev`, `qa`, `prod`"
-        required: true
-        type: choice
-        options: [dev, qa, prod]
-        default: dev
-
-      APP:
-        description: "Application identifier (e.g. `myapp`, `otherapp`)"
-        required: true
-        type: choice
-        options: [myapp, otherapp]
-        
+env:
+  ENV: dev
+  APP: myapp
 
 jobs:
   terraform-plan:
-
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
-
-    environment: ${{ inputs.ENV || 'dev' }}
+    environment: ${{ env.ENV }}
 
     env:
       TF_IN_AUTOMATION: true
 
     defaults:
-
       run:
-
-        working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
+        working-directory: infra/envs/${{ env.ENV }}
 
     steps:
       - name: Checkout repository
@@ -46,7 +29,7 @@ jobs:
       - name: Check Terraform Cloud token
         id: check_token
         run: |
-          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}" ]; then
+          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}" ]; then
             echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
           else
             echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
@@ -57,7 +40,7 @@ jobs:
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.14.0
-          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}
+          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}
 
       - name: Terraform Format Check
         if: env.TOKEN_EXISTS == 'true'
@@ -74,7 +57,7 @@ jobs:
       - name: Terraform Plan
         if: env.TOKEN_EXISTS == 'true'
         run: |
-          echo "Running Terraform PLAN for ${{ inputs.ENV || 'dev' }}"
+          echo "Running Terraform PLAN for $ENV"
           terraform plan -no-color
 
       - name: Skip Terraform steps

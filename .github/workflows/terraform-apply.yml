@@ -1,0 +1,125 @@
+name: terraform-deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  qa:
+    name: Deploy-to-QA
+    runs-on: ubuntu-latest
+    environment: qa
+    env:
+      ENV: qa
+      APP: myapp
+
+    defaults:
+      run:
+        working-directory: infra/envs/${{ env.ENV }}
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Terraform Cloud token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}" ]; then
+            echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
+          else
+            echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Terraform
+        if: env.TOKEN_EXISTS == 'true'
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.14.0
+          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}
+
+      - name: Terraform Format Check
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform init
+
+      - name: Terraform Validate
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: env.TOKEN_EXISTS == 'true'
+        run: |
+          echo "Running Terraform PLAN for ${{ env.ENV }}"
+          terraform plan -no-color
+
+      - name: Skip Terraform steps
+        if: env.TOKEN_EXISTS == 'false'
+        run: echo "Skipping Terraform - token not available"
+
+      - name: Terraform Apply
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform apply -auto-approve
+
+  prod:
+    name: Deploy-to-PROD
+    runs-on: ubuntu-latest
+    needs: qa
+    environment: prod
+    env:
+      ENV: prod
+      APP: myapp
+
+    defaults:
+      run:
+        working-directory: infra/envs/${{ env.ENV }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Terraform Cloud token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}" ]; then
+            echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
+          else
+            echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Terraform
+        if: env.TOKEN_EXISTS == 'true'
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.14.0
+          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}
+
+      - name: Terraform Format Check
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform init
+
+      - name: Terraform Validate
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: env.TOKEN_EXISTS == 'true'
+        run: |
+          echo "Running Terraform PLAN for ${{ env.ENV }}"
+          terraform plan -no-color
+
+      - name: Skip Terraform steps
+        if: env.TOKEN_EXISTS == 'false'
+        run: echo "Skipping Terraform - token not available"
+
+      - name: Terraform Apply
+        if: env.TOKEN_EXISTS == 'true'
+        run: terraform apply -auto-approve
