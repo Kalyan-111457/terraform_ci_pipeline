@@ -8,10 +8,7 @@ on:
 jobs:
   qa-plan:
     name: QA-Plan
-    runs-on: ubuntu-latest
-    environment: qa
-   
-  
+    runs-on: ubuntu-latest   
     defaults:
       run:
         working-directory: infra/envs/qa
@@ -66,18 +63,10 @@ jobs:
         run: echo "Skipping Terraform - token not available"
 
 
-  qa-approval-gate:
-    name: qa Approval Gate
-    runs-on: ubuntu-latest
-    needs: [qa-plan]  # Waits for QA to pass, then requests approval
-    environment: qa-approval-gate  # <-- Only this environment has the approval protection rule
-    steps:
-      - run: echo "Approval granted. Proceeding with Prod deployment."
-
   qa-apply:
     name: QA-Apply 
     runs-on: ubuntu-latest
-    needs: qa-approval-gate
+    needs: qa-plan
     environment: qa
   
     defaults:
@@ -112,7 +101,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: qa-apply
     environment: prod
-  
   
     defaults:
       run:
@@ -173,7 +161,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: prod-plan
     environment: prod
-  
 
     defaults:
       run:
