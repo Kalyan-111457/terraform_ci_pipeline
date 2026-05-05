@@ -13,7 +13,7 @@ jobs:
   terraform-plan:
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
-    environment: ${{ env.ENV }}
+    environment: dev
 
     env:
       TF_IN_AUTOMATION: true
