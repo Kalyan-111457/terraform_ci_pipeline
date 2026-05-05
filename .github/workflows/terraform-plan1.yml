@@ -32,7 +32,7 @@ jobs:
       TF_IN_AUTOMATION: true
 
     defaults:
-    
+
       run:
 
         working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
@@ -58,15 +58,19 @@ jobs:
           cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}
 
       - name: Terraform Format Check
+        if: env.TOKEN_EXISTS == 'true'
         run: terraform fmt -check
 
       - name: Terraform Init
+        if: env.TOKEN_EXISTS == 'true'
         run: terraform init
 
       - name: Terraform Validate
+        if: env.TOKEN_EXISTS == 'true'
         run: terraform validate
 
       - name: Terraform Plan
+        if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform PLAN for ${{ inputs.ENV || 'dev' }}"
           terraform plan -no-color
