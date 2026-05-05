@@ -101,7 +101,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dev-tfplan
-          path: terraform.tfplan
+          path: .
+
+      - name: List files for debug
+        if: env.TOKEN_EXISTS == 'true'
+        run: |
+          echo "Listing files in working directory:"
+          ls -l
 
       - name: Setup Terraform
         if: env.TOKEN_EXISTS == 'true'
@@ -115,4 +121,4 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform APPLY for $ENV"
-          terraform apply -auto-approve -no-color
+          terraform apply -auto-approve -no-color terraform.tfplan
