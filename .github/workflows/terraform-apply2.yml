@@ -9,7 +9,6 @@ jobs:
   qa-plan:
     name: QA - Plan
     runs-on: ubuntu-latest
-    environment: qa
     env:
       ENV: qa
       APP: myapp
