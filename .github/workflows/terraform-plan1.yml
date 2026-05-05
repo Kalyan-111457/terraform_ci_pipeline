@@ -78,7 +78,7 @@ jobs:
         run: |
            if  terraform show -no-color tfplan | grep -q "No changes."; then
            echo "changes=0" >> $GITHUB_OUTPUT
-           echo "No changes detected"
+           echo "No changes detecteds"
            else
            echo "changes=1" >> $GITHUB_OUTPUT
            echo "Changes detected"
