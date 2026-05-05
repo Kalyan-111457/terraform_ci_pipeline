@@ -9,7 +9,6 @@ jobs:
   qa-plan:
     name: QA - Plan
     runs-on: ubuntu-latest
-    environment: qa
     env:
       ENV: qa
       APP: myapp
@@ -55,7 +54,7 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform PLAN for $ENV"
-          terraform plan -no-color -out=tfplan  # FIX: added -out=tfplan so the plan is saved
+          terraform plan -no-color -out=tfplan 
 
       - name: Upload QA Plan
         if: env.TOKEN_EXISTS == 'true'
