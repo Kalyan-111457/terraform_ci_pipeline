@@ -61,7 +61,7 @@ jobs:
         with:
           name: dev-plan
           path: infra/envs/dev/tfplan
-          
+
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
@@ -91,12 +91,7 @@ jobs:
         with:
           name: dev-plan
 
-      - name: Download Lock File
-        if: env.TOKEN_EXISTS == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: dev-lockfile
-          path: .
+
 
       - name: Setup Terraform
         if: env.TOKEN_EXISTS == 'true'
