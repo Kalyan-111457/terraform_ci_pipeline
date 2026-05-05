@@ -58,7 +58,7 @@ jobs:
         if: env.TOKEN_EXISTS == 'true'
         run: |
           echo "Running Terraform PLAN for $ENV"
-          terraform plan -no-color
+            terraform plan -no-color -out=terraform.tfplan
       - name: Upload Dev Plan
         if: env.TOKEN_EXISTS == 'true'
         uses: actions/upload-artifact@v4
