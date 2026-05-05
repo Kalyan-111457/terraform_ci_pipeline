@@ -25,7 +25,7 @@ variable "vnet_subnet_count" {
 
 # Added for pipeline test
 variable "pipeline_test_flag" {
-  description = "Flag to test pipeline PR trigger."
+  description = "Flag to test1 pipeline PR trigger."
   type        = bool
   default     = true
 }
