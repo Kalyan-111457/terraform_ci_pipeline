@@ -1,5 +1,4 @@
 name: terraform-plan
-
 on:
   pull_request:
     branches:
@@ -11,6 +10,7 @@ env:
 
 jobs:
   terraform-plan:
+
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
     environment: dev
@@ -59,7 +59,60 @@ jobs:
         run: |
           echo "Running Terraform PLAN for $ENV"
           terraform plan -no-color
+      - name: Upload Dev Plan
+        if: env.TOKEN_EXISTS == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: dev-tfplan
+          path: terraform.tfplan
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
         run: echo "Skipping Terraform - token not available"
+
+  terraform-deploy:
+  
+    name: Terraform CI - Deploy
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    environment: dev
+    env:
+      ENV: dev
+      APP: myapp
+      TF_IN_AUTOMATION: true
+    defaults:
+      run:
+        working-directory: infra/envs/${{ env.ENV }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Check Terraform Cloud token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}" ]; then
+            echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
+          else
+            echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
+          fi
+
+      - name: Download Dev Plan
+        if: env.TOKEN_EXISTS == 'true'
+        uses: actions/download-artifact@v3
+        with:
+          name: dev-tfplan
+          path: terraform.tfplan
+
+      - name: Setup Terraform
+        if: env.TOKEN_EXISTS == 'true'
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.14.0
+          cli_config_credentials_token: ${{ secrets[format('{0}_TFE_TOKEN', env.APP)] }}
+
+
+      - name: Terraform Apply
+        if: env.TOKEN_EXISTS == 'true'
+        run: |
+          echo "Running Terraform APPLY for $ENV"
+          terraform apply -auto-approve -no-color
