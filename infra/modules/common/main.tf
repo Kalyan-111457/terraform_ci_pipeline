@@ -5,5 +5,6 @@ resource "azurerm_resource_group" "example" {
   tags = {
     Environment = "dev"
     Project     = "terraform-ci-pipeline"
+    TestRun     = "pipeline-validation"
   }
 }

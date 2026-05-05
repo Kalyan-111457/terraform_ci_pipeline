@@ -25,29 +25,29 @@ variable "vnet_subnet_count" {
 
 
 variable "network_security_group_rules" {
-    type = list(object({
-      priority =number
-      destination_port_range = string 
-    }))
-    description = "this defines the network security rules"
+  type = list(object({
+    priority               = number
+    destination_port_range = string
+  }))
+  description = "this defines the network security rules"
 }
 
 
 
 variable "virtual_machine_count" {
-    description = "The number of virtual machines."
-    type        = number
+  description = "The number of virtual machines."
+  type        = number
 }
 
 variable "virtual_machine_size" {
-    description = "The Azure VM size."
-    type        = string
+  description = "The Azure VM size."
+  type        = string
 }
 
 
 variable "Virual_machine_scale_set_name" {
-    description = "The name of the virtual machine scale set."
-    type        = string
+  description = "The name of the virtual machine scale set."
+  type        = string
 }
 
 

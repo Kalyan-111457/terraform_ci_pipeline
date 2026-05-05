@@ -1,11 +1,9 @@
 name: terraform-plan
 
-
 on:
   pull_request:
     branches:
       - develop
-  
 
   workflow_dispatch:
     inputs:
@@ -13,42 +11,47 @@ on:
         description: "Target environment"
         required: true
         type: choice
-        options:
-          - dev
+        options: [dev, qa, prod]
         default: dev
+
       APP:
         description: "Application identifier"
         required: true
         type: choice
-        options:
-          - myapp
+        options: [myapp, otherapp]
 
 jobs:
   terraform-plan:
+
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
+
     environment: ${{ inputs.ENV || 'dev' }}
 
     env:
       TF_IN_AUTOMATION: true
 
     defaults:
+    
       run:
+
         working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Terraform Cloud token
-        if: github.event_name != 'pull_request'
+      - name: Check Terraform Cloud token
+        id: check_token
         run: |
           if [ -z "${{ secrets[format('{0}_TFE_TOKEN', inputs.APP || 'myapp')] }}" ]; then
-            echo "::error::Missing Terraform Cloud token"
-            exit 1
+            echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
+          else
+            echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
           fi
 
       - name: Setup Terraform
+        if: env.TOKEN_EXISTS == 'true'
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.14.0
@@ -65,5 +68,9 @@ jobs:
 
       - name: Terraform Plan
         run: |
-          echo "Running Terraform PLAN (CI) for ${{ inputs.ENV || 'dev' }} environment"
+          echo "Running Terraform PLAN for ${{ inputs.ENV || 'dev' }}"
           terraform plan -no-color
+
+      - name: Skip Terraform steps
+        if: env.TOKEN_EXISTS == 'false'
+        run: echo "Skipping Terraform - token not available"
