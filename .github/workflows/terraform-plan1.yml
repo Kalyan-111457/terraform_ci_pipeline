@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dev-tfplan
-          path: infra/envs/dev/tfplan
+          path: tfplan
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'

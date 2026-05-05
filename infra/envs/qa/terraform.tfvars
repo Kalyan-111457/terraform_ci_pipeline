@@ -1,5 +1,7 @@
-resource_group_name     = "rg-terraform-pipeline-test"
-resource_group_location = "East US"
-vnet_name               = "vnet-terraform-pipeline-test"
-address_space           = ["10.1.0.0/16"]
-vnet_subnet_count       = 1
+
+
+resource_group_name     = "rg-qa"
+resource_group_location = "West US"
+vnet_name               = "vnet-qa"
+address_space           = ["10.20.0.0/16"]
+vnet_subnet_count       = 3
