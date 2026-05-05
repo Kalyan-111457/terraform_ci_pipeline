@@ -7,13 +7,13 @@ on:
 
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Target environment"
+      ENV:
+        description: "Target environment: `dev`, `qa`, `prod`"
         required: true
         type: choice
-        options:
-          - dev
+        options: [dev, qa, prod]
         default: dev
+      
 
 jobs:
   terraform-plan:
@@ -22,7 +22,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infra/envs/${{ inputs.environment || 'dev' }}
+        working-directory: infra/envs/${{ inputs.ENV || 'dev' }}
 
     steps:
       - name: Checkout repository
