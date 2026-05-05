@@ -6,6 +6,6 @@ resource "azurerm_resource_group" "example" {
     Environment = "dev"
     Project     = "terraform-ci-pipeline"
     TestRun     = "pipeline-validation"
-    Version     = "v1.2"
+    Version     = "v1.1"
   }
 }
