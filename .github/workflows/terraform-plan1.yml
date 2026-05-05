@@ -77,56 +77,7 @@ jobs:
            echo "Changes detected"
            fi
 
-      - name: Create or Update Terraform Plan PR Comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        env:
-          PLAN: ${{ steps.show.outputs.stdout }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const commentIdentifier = '## Latest Terraform Plan';
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existingComment = comments.find(comment =>
-              comment.body.includes(commentIdentifier)
-            );
-
-            const planOutput = process.env.PLAN || 'No changes detected.';
-
-            const now = new Date();
-            const formattedDate = new Intl.DateTimeFormat('en-US', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-              timeZone: 'UTC'
-            }).format(now) + ' UTC';
-
-            const output = `${commentIdentifier}\n\n**Environment:** \`dev\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existingComment.id,
-                body: output
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: output
-              });
-            }
 
 
 
