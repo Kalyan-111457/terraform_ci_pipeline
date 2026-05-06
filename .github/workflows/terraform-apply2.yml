@@ -104,7 +104,7 @@ jobs:
               timeZone: 'UTC'
             }).format(now) + ' UTC';
 
-            const output = `${commentIdentifier}\n\n**Environment:** \`dev\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            const output = `${commentIdentifier}\n\n**Environment:** \`qa\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             if (existingComment) {
               await github.rest.issues.updateComment({
@@ -261,7 +261,7 @@ jobs:
               timeZone: 'UTC'
             }).format(now) + ' UTC';
 
-            const output = `${commentIdentifier}\n\n**Environment:** \`dev\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            const output = `${commentIdentifier}\n\n**Environment:** \`prod\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             if (existingComment) {
               await github.rest.issues.updateComment({
