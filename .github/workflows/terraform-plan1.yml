@@ -4,6 +4,12 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+
 
 jobs:
   terraform-plan:
@@ -52,17 +58,133 @@ jobs:
 
       - name: Terraform Plan
         if: env.TOKEN_EXISTS == 'true'
+        id: plan
         run: |
-          echo "Running Terraform PLAN for dev"
-          terraform plan -no-color -out=tfplan  
+          echo "Running Terraform PLANs for dev"
+          terraform plan -no-color -out=tfplan> plan.txt
 
       - name: Upload Dev Plan
         if: env.TOKEN_EXISTS == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: dev-tfplan
-          path: tfplan
+          name: dev-plan
+          path: infra/envs/dev/tfplan
+
+
+      
+      - name: Terraform Show
+        shell: bash
+        id: show
+        run: |
+           if  terraform show -no-color tfplan | grep -q "No changes."; then
+           echo "changes=0" >> $GITHUB_OUTPUT
+           echo "No changes detecteds"
+           else
+           echo "changes=1" >> $GITHUB_OUTPUT
+           echo "Changes detected"
+           fi
+
+      - name: Create or Update Terraform Plan PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.show.outputs.stdout }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commentIdentifier = '## Latest Terraform Plan';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(comment =>
+              comment.body.includes(commentIdentifier)
+            );
+
+            const planOutput = process.env.PLAN || 'No changes detected.';
+
+            const now = new Date();
+            const formattedDate = new Intl.DateTimeFormat('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: 'UTC'
+            }).format(now) + ' UTC';
+
+            const output = `${commentIdentifier}\n\n**Environment:** \`dev\`\n**Plan Date:** \`${formattedDate}\`\n\n<details><summary>Show Terraform Plan</summary>\n\n\u0060\u0060\u0060terraform\n${planOutput}\n\u0060\u0060\u0060\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: output
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: output
+              });
+            }
+
+
 
       - name: Skip Terraform steps
         if: env.TOKEN_EXISTS == 'false'
         run: echo "Skipping Terraform - token not available"
+  
+  
+  terraform-deploy:
+   name: Terraform CI - Deploy
+   runs-on: ubuntu-latest
+   needs: terraform-plan
+   environment: dev
+
+   defaults:
+    run:
+      working-directory: infra/envs/dev
+
+   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check Terraform Cloud token
+      id: check_token
+      run: |
+        if [ -z "${{ secrets.MYAPP_TFE_TOKEN }}" ]; then
+          echo "TOKEN_EXISTS=false" >> $GITHUB_ENV
+        else
+          echo "TOKEN_EXISTS=true" >> $GITHUB_ENV
+        fi
+
+    - name: Download Dev Plan
+      if: env.TOKEN_EXISTS == 'true'
+      uses: actions/download-artifact@v4
+      with:
+        name: dev-plan
+        path: infra/envs/dev
+
+    - name: Setup Terraform
+      if: env.TOKEN_EXISTS == 'true'
+      uses: hashicorp/setup-terraform@v4
+      with:
+        terraform_version: 1.14.0
+        cli_config_credentials_token: ${{ secrets.MYAPP_TFE_TOKEN }}
+
+    - name: Terraform Init
+      if: env.TOKEN_EXISTS == 'true'
+      run: terraform init
+
+    - name: Terraform Apply
+      if: env.TOKEN_EXISTS == 'true'
+      run: |
+        echo "Running Terraform APPLY for dev"
+        terraform apply -no-color -auto-approve tfplan
