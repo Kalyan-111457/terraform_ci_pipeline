@@ -186,7 +186,6 @@ jobs:
       run: terraform init
 
 
-
     - name: Terraform Apply
       if: env.TOKEN_EXISTS == 'true' && needs.terraform-plan.outputs.changes == '1' 
       run: |

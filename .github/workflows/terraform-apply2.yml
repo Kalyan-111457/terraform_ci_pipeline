@@ -19,6 +19,8 @@ jobs:
     defaults:
       run:
         working-directory: infra/envs/qa
+    outputs:
+      changes: ${{ steps.show.outputs.changes }}
 
     steps:
       - name: Checkout repository
@@ -165,6 +167,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
+        if: env.TOKEN_EXISTS == 'true' && needs.qa-plan.outputs.changes == '1'
         run: terraform apply -auto-approve tfplan
 
 
@@ -173,6 +176,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: qa-apply
     environment: prod
+
+    outputs:
+      changes: ${{ steps.show.outputs.changes }}
   
     defaults:
       run:
@@ -322,4 +328,5 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
+        if: env.TOKEN_EXISTS == 'true' && needs.prod-plan.outputs.changes == '1'
         run: terraform apply -auto-approve tfplan
