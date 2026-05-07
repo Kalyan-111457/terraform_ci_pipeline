@@ -1,4 +1,4 @@
-name: terraform-deploy
+name: deploy-terraform
 
 on:
   pull_request:
