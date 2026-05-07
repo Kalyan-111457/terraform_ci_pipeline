@@ -1,0 +1,19 @@
+name: deploy-terraform
+ 
+on:
+  pull_request:
+    branches:
+      - develop
+ 
+jobs:
+  deploy-dev:
+    name: Deploy DEV
+    uses: ./.github/workflows/terraform-e1.yml
+ 
+    with:
+      environment: dev
+      version: ${{ github.sha }}  # Use the commit SHA as the version for traceability
+      terraform_version: 1.14.0
+ 
+    secrets:
+      TFE_TOKEN: ${{ secrets.MYAPP_TFE_TOKEN }}
