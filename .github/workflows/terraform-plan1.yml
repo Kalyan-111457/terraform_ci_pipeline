@@ -17,6 +17,9 @@ jobs:
     name: Terraform CI - Plan
     runs-on: ubuntu-latest
 
+    outputs:
+      changes: ${{ steps.show.outputs.changes }}
+
     env:
       TF_IN_AUTOMATION: true
 
@@ -183,9 +186,8 @@ jobs:
       run: terraform init
 
 
-
     - name: Terraform Apply
-      if: env.TOKEN_EXISTS == 'true' 
+      if: env.TOKEN_EXISTS == 'true' && needs.terraform-plan.outputs.changes == '1' 
       run: |
         echo "Running Terraform APPLY for dev"
         terraform apply -no-color -auto-approve tfplan
