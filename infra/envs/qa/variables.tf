@@ -23,6 +23,11 @@ variable "vnet_subnet_count" {
   type        = number
 }
 
+variable "app_version" {
+  description = "The application version for deployment"
+  type        = string
+}
+
 # Added for pipeline test
 variable "pipeline_test_flag" {
   description = "Flag to test1 pipeline PR trigger."
