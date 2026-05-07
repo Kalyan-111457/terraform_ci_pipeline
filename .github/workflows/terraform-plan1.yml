@@ -182,8 +182,10 @@ jobs:
       if: env.TOKEN_EXISTS == 'true'
       run: terraform init
 
+
+
     - name: Terraform Apply
-      if: env.TOKEN_EXISTS == 'true'
+      if: env.TOKEN_EXISTS == 'true' 
       run: |
         echo "Running Terraform APPLY for dev"
         terraform apply -no-color -auto-approve tfplan
